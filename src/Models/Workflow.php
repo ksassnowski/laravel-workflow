@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
@@ -45,6 +46,8 @@ use Sassnowski\Venture\WorkflowableJob;
  */
 class Workflow extends Model
 {
+    use Prunable;
+
     /**
      * @var array<int, string>
      */
@@ -250,5 +253,10 @@ class Workflow extends Model
     private function serializer(): WorkflowJobSerializer
     {
         return Container::getInstance()->make(WorkflowJobSerializer::class);
+    }
+
+    public function prunable()
+    {
+        return static::where('created_at', '<=', now()->subDays(config('venture.prune_days', 7)));
     }
 }

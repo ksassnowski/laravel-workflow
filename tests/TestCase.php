@@ -54,6 +54,7 @@ class TestCase extends OrchestraTestCase
             'driver' => 'sqlite',
             'database' => ':memory:',
             'prefix' => '',
+            'foreign_key_constraints' => true,
         ]);
 
         config()->set('venture.workflow_table', 'workflows');

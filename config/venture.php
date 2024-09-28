@@ -16,6 +16,11 @@ return [
     'jobs_table' => 'workflow_jobs',
 
     /*
+     * The number of days to keep when pruning workflows.
+     */
+    'prune_days' => 3,
+
+    /*
      * The class that should be used to generate an id for a workflow
      * job if no explicit id was provided. In most cases, you won't have
      * to change this.
