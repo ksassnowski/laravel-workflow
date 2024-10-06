@@ -16,6 +16,8 @@ namespace Sassnowski\Venture\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 use Sassnowski\Venture\Exceptions\CannotRetryJobException;
 use Sassnowski\Venture\Exceptions\JobAlreadyStartedException;
 use Sassnowski\Venture\Serializer\WorkflowJobSerializer;
@@ -168,6 +170,20 @@ class WorkflowJob extends Model
     {
         if (!$this->hasFailed()) {
             throw new CannotRetryJobException();
+        }
+
+        if (config('queue.failed.driver') == 'database-uuids') {
+            $job = DB::connection(config('queue.failed.database'))
+                ->table(config('queue.failed.table'))
+                ->select('uuid')
+                ->where('payload', 'LIKE', "%{$this->uuid}%")
+                ->first();
+            if ($job) {
+                Artisan::call('queue:retry', [
+                    'id' => $job->uuid
+                ]);
+                return;
+            }
         }
 
         \dispatch($this->step());
